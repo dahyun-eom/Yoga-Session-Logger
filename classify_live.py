@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import pickle
+import time
 
 # load trained model
 with open("pose_model.pkl", "rb") as f:
@@ -25,6 +26,22 @@ CONNECTIONS = [
     (11, 23), (12, 24), (23, 24),
     (23, 25), (25, 27), (24, 26), (26, 28),
 ]
+
+# ── STABILITY SETTINGS ──────────────────────────────────────────
+STABILITY_THRESHOLD = 0.02   # how much movement = unstable
+REQUIRED_STABLE_SEC = 2.0    # seconds to hold before confirming
+FPS = 30
+REQUIRED_STABLE_FRAMES = int(REQUIRED_STABLE_SEC * FPS)
+
+# ── SESSION LOG ─────────────────────────────────────────────────
+session_log = []
+
+# ── STATE ───────────────────────────────────────────────────────
+prev_keypoints = None
+stable_frames = 0
+current_pose = None
+hold_start_time = None
+last_logged_pose = None
 
 cap = cv2.VideoCapture(0)
 print("Starting YoseLog... press Q to quit")
@@ -59,21 +76,66 @@ with PoseLandmarker.create_from_options(options) as landmarker:
                 y = int(lm.y * h)
                 cv2.circle(frame, (x, y), 5, (255, 255, 255), -1)
 
-            # extract keypoints for classifier
+            # extract keypoints
             keypoints = []
             for lm in landmarks:
                 keypoints.append(lm.x)
                 keypoints.append(lm.y)
+            keypoints = np.array(keypoints)
 
             # predict pose
-            keypoints = np.array(keypoints).reshape(1, -1)
-            prediction = model.predict(keypoints)[0]
-            confidence = model.predict_proba(keypoints).max() * 100
+            prediction = model.predict(keypoints.reshape(1, -1))[0]
+            confidence = model.predict_proba(keypoints.reshape(1, -1)).max() * 100
 
-            # display prediction on screen
+            # ── STABILITY DETECTION ──────────────────────────────
+            if prev_keypoints is not None:
+                diff = np.mean(np.abs(keypoints - prev_keypoints))
+
+                if diff < STABILITY_THRESHOLD and prediction == current_pose:
+                    stable_frames += 1
+                else:
+                    # pose changed or moved — reset
+                    if current_pose is not None and hold_start_time is not None:
+                        hold_duration = time.time() - hold_start_time
+                        if hold_duration >= REQUIRED_STABLE_SEC and current_pose != last_logged_pose:
+                            session_log.append({
+                                "pose": current_pose,
+                                "duration": round(hold_duration, 1)
+                            })
+                            last_logged_pose = current_pose
+                            print(f"Logged: {current_pose} — {hold_duration:.1f}s")
+
+                    stable_frames = 0
+                    current_pose = prediction
+                    hold_start_time = time.time()
+
+            else:
+                current_pose = prediction
+                hold_start_time = time.time()
+
+            prev_keypoints = keypoints
+
+            # ── DISPLAY ──────────────────────────────────────────
+            # pose name and confidence
             cv2.putText(frame, f"{prediction} ({confidence:.0f}%)",
-                (20, 50), cv2.FONT_HERSHEY_SIMPLEX,
-                1.2, (0, 255, 255), 3)
+                (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
+
+            # stability progress bar
+            progress = min(stable_frames / REQUIRED_STABLE_FRAMES, 1.0)
+            bar_width = int(400 * progress)
+            cv2.rectangle(frame, (20, 70), (420, 95), (50, 50, 50), -1)
+            cv2.rectangle(frame, (20, 70), (20 + bar_width, 95), (0, 255, 0), -1)
+            cv2.putText(frame, f"Hold: {progress*100:.0f}%",
+                (20, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+            # session log on screen
+            cv2.putText(frame, "Session Log:",
+                (20, 160), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 1)
+            for i, entry in enumerate(session_log[-5:]):
+                cv2.putText(frame,
+                    f"  {entry['pose']} — {entry['duration']}s",
+                    (20, 185 + i * 25),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 200, 200), 1)
 
         cv2.imshow("YoseLog", frame)
 
@@ -82,3 +144,14 @@ with PoseLandmarker.create_from_options(options) as landmarker:
 
 cap.release()
 cv2.destroyAllWindows()
+
+# ── FINAL SUMMARY ────────────────────────────────────────────────
+print("\n===== SESSION SUMMARY =====")
+if session_log:
+    for entry in session_log:
+        print(f"  {entry['pose']:15} — {entry['duration']}s")
+    total = sum(e['duration'] for e in session_log)
+    print(f"\n  Total session time: {total:.1f}s")
+else:
+    print("  No poses logged this session.")
+print("===========================")
