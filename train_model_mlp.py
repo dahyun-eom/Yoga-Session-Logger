@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import pickle
@@ -22,9 +22,9 @@ X_train, X_test, y_train, y_test = train_test_split(
 print(f"\nTraining samples: {len(X_train)}")
 print(f"Testing samples: {len(X_test)}")
 
-# train Random Forest
-print("\nTraining Random Forest...")
-model = RandomForestClassifier(n_estimators=300, random_state=42)
+# train mlp
+print("\nTraining MLP classifier...")
+model = MLPClassifier(hidden_layer_sizes=(256, 128), max_iter=500, random_state=42)
 model.fit(X_train, y_train)
 
 # evaluate

@@ -44,8 +44,8 @@ hold_start_time = None
 last_logged_pose = None
 accumulated_time = 0.0
 
-# cap = cv2.VideoCapture(0) #realtime
-cap = cv2.VideoCapture("dataset/test2_video.mov")
+cap = cv2.VideoCapture(0) #realtime
+#cap = cv2.VideoCapture("dataset/test2_video.mov")
 print("Starting YoseLog... press Q to quit")
 
 with PoseLandmarker.create_from_options(options) as landmarker:
@@ -126,8 +126,15 @@ with PoseLandmarker.create_from_options(options) as landmarker:
 
             # ── DISPLAY ──────────────────────────────────────────
             # pose name and confidence
-            cv2.putText(frame, f"{prediction} ({confidence:.0f}%)",
-                (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
+            # cv2.putText(frame, f"{prediction} ({confidence:.0f}%)",
+            #     (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 2.5, (0, 255, 255), 4)
+            #     # (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
+            if stable_frames >= REQUIRED_STABLE_FRAMES:
+                cv2.putText(frame, f"{current_pose} ({confidence:.0f}%)",
+                    (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 2.5, (0, 255, 0), 4)
+            else:
+                cv2.putText(frame, "holding...",
+                    (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 255), 3)
 
             # live hold timer — shows accumulating seconds
             cv2.putText(frame, f"Holding: {accumulated_time:.1f}s",
