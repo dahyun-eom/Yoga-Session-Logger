@@ -115,3 +115,4 @@ print(f"\nFinished!")
 print(f"Saved: {success} samples")
 print(f"Skipped: {skipped} images (no pose detected or bad image)")
 print(f"CSV saved to keypoints.csv")
+
