@@ -23,7 +23,8 @@ POSES = [
     "triangle", "seated_forward", "low_lunge", "pigeon", "cat_cow",
     "corpse", "standing_forward", "wheel", "boat", "camel",
     "half_moon", "eagle", "side_plank", "locust", "fish",
-    "bow", "garland", "dolphin", "extended_side"
+    "bow", "garland", "dolphin", "extended_side", "happy_baby", "legs_up_wall", "handstand", "plow", "staff",
+    "bound_angle", "reclining_toe", "wide_forward", "gate", "upward_plank"
 ]
 
 

@@ -34,6 +34,16 @@ POSES = {
     "garland":           "Yoga-82/yoga_dataset_links/Garland_Pose_or_Malasana_.txt",
     "dolphin":           "Yoga-82/yoga_dataset_links/Dolphin_Pose_or_Ardha_Pincha_Mayurasana_.txt",
     "extended_side":     "Yoga-82/yoga_dataset_links/Extended_Revolved_Side_Angle_Pose_or_Utthita_Parsvakonasana_.txt",
+    "happy_baby":        "Yoga-82/yoga_dataset_links/Happy_Baby_Pose_or_Ananda_Balasana_.txt",
+    "legs_up_wall":      "Yoga-82/yoga_dataset_links/Legs-Up-the-Wall_Pose_or_Viparita_Karani_.txt",
+    "handstand":         "Yoga-82/yoga_dataset_links/Handstand_pose_or_Adho_Mukha_Vrksasana_.txt",
+    "plow":              "Yoga-82/yoga_dataset_links/Plow_Pose_or_Halasana_.txt",
+    "staff":             "Yoga-82/yoga_dataset_links/Staff_Pose_or_Dandasana_.txt",
+    "bound_angle":       "Yoga-82/yoga_dataset_links/Bound_Angle_Pose_or_Baddha_Konasana_.txt",
+    "reclining_toe":     "Yoga-82/yoga_dataset_links/Reclining_Hand-to-Big-Toe_Pose_or_Supta_Padangusthasana_.txt",
+    "wide_forward":      "Yoga-82/yoga_dataset_links/Wide-Legged_Forward_Bend_pose_or_Prasarita_Padottanasana_.txt",
+    "gate":              "Yoga-82/yoga_dataset_links/Gate_Pose_or_Parighasana_.txt",
+    "upward_plank":      "Yoga-82/yoga_dataset_links/Upward_Plank_Pose_or_Purvottanasana_.txt",
 }
 
 # download limit per pose (to keep it manageable)
