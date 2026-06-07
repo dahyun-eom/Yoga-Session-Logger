@@ -32,6 +32,8 @@ CONNECTIONS = [
 MIN_POSE_CONFIDENCE = 45.0
 MIN_LANDMARK_VISIBILITY = 0.35
 PAUSE_GESTURE_FRAMES = 18
+MIN_VISIBLE_LANDMARK_RATIO = 0.55
+DRAW_SKELETON = False
 
 ASYMMETRIC_POSES = {
     "warrior_1", "warrior_2", "warrior_3", "reverse_warrior",
@@ -144,6 +146,17 @@ def landmarks_are_visible(landmarks):
         if visibility < MIN_LANDMARK_VISIBILITY or presence < MIN_LANDMARK_VISIBILITY:
             return False
     return True
+
+
+def visible_landmark_ratio(landmarks):
+    visible = 0
+    for landmark in landmarks:
+        visibility = getattr(landmark, "visibility", 1.0)
+        presence = getattr(landmark, "presence", 1.0)
+        in_frame = 0.0 <= landmark.x <= 1.0 and 0.0 <= landmark.y <= 1.0
+        if visibility >= MIN_LANDMARK_VISIBILITY and presence >= MIN_LANDMARK_VISIBILITY and in_frame:
+            visible += 1
+    return visible / len(landmarks)
 
 
 def is_pause_gesture(landmarks):
@@ -293,7 +306,7 @@ class YogaSessionEngine:
                 active=True,
                 required_stable_frames=self.required_stable_frames,
                 started_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                message="Starting camera",
+                message="Starting video" if isinstance(self.camera_index, str) else "Starting camera",
             )
             self.prev_keypoints = None
             self.last_landmarks = None
@@ -377,7 +390,7 @@ class YogaSessionEngine:
         if not cap.isOpened():
             with self.lock:
                 self.state.active = False
-                self.state.message = "Camera could not be opened"
+                self.state.message = "Video source could not be opened"
             return
 
         with PoseLandmarker.create_from_options(options) as landmarker:
@@ -405,7 +418,12 @@ class YogaSessionEngine:
             return self._draw_overlay(annotated)
 
         landmarks = result.pose_landmarks[0]
-        draw_skeleton(annotated, landmarks)
+        if DRAW_SKELETON:
+            draw_skeleton(annotated, landmarks)
+        if visible_landmark_ratio(landmarks) < MIN_VISIBLE_LANDMARK_RATIO:
+            self._mark_framing_warning()
+            return self._draw_overlay(annotated)
+
         keypoints = landmarks_to_keypoints(landmarks)
         self.keypoint_history.append(keypoints)
         smoothed = np.mean(self.keypoint_history, axis=0)
@@ -456,6 +474,21 @@ class YogaSessionEngine:
             self.state.balance_status = balance_label(self.state.balance)
 
             self.prev_keypoints = keypoints
+
+    def _mark_framing_warning(self):
+        with self.lock:
+            self._log_current_pose_locked()
+            self.state.current_pose = None
+            self.state.display_pose = "Too close"
+            self.state.confidence = 0.0
+            self.state.stable_frames = 0
+            self.state.accumulated_time = 0.0
+            self.state.balance = None
+            self.state.balance_status = "Collecting"
+            self.state.movement = 0.0
+            self.state.message = "Too close - move backward a bit"
+            self.hold_keypoints = []
+            self.prev_keypoints = None
 
     def _handle_pause_gesture(self, landmarks, keypoints):
         gesture_detected = is_pause_gesture(landmarks)

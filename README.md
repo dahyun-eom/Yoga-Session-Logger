@@ -68,6 +68,12 @@ python app.py
 
 Open http://127.0.0.1:5001, then press **Start**.
 
+To run the same app on a recorded video instead of the webcam:
+
+```bash
+YOSELOG_VIDEO="/path/to/session_video.mov" python app.py
+```
+
 The website shows:
 
 - live webcam pose skeleton

@@ -37,7 +37,7 @@ async function refreshState() {
 }
 
 function renderState(state) {
-  els.currentPose.textContent = titlePose(state.display_pose || state.current_pose);
+  els.currentPose.textContent = titlePose(state.message || state.display_pose || state.current_pose);
   els.message.textContent = state.message || "";
   els.confidence.textContent = `${state.confidence || 0}%`;
   els.holdTime.textContent = `${state.accumulated_time || 0}s`;

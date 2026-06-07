@@ -7,8 +7,15 @@ from flask import Flask, Response, jsonify, render_template, send_file
 from yoselog_core import YogaSessionEngine
 
 
+def video_source_from_env():
+    source = os.environ.get("YOSELOG_VIDEO")
+    if source:
+        return source
+    return 0
+
+
 app = Flask(__name__)
-engine = YogaSessionEngine()
+engine = YogaSessionEngine(video_source_from_env())
 
 
 @app.route("/")
