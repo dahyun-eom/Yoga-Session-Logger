@@ -1,6 +1,6 @@
 # YoseLog — Yoga Session Logger
 
-Real-time yoga pose detection and session tracking using MediaPipe and a trained Random Forest classifier.
+Real-time yoga pose detection, balance scoring, and session tracking using MediaPipe and a trained Random Forest classifier.
 
 ## Dataset
 
@@ -58,6 +58,30 @@ The following files are included in the repo and ready to use:
 
 ## Run
 
+### Website
+
+```bash
+conda activate yoselog
+pip install -r requirements.txt
+python app.py
+```
+
+Open http://127.0.0.1:5001, then press **Start**.
+
+The website shows:
+
+- live webcam pose skeleton
+- current pose and confidence
+- hold timer and stability progress
+- balance score based on pose sway
+- automatic session log with duration and balance per pose
+- CSV export for the session
+
+The website currently logs the raw model pose label without adding left/right
+side suffixes. This matches the older live-classifier behavior.
+
+### OpenCV camera window
+
 ```bash
 conda activate yoselog
 python classify_live.py
@@ -65,11 +89,29 @@ python classify_live.py
 
 Press **Q** to quit the camera window.
 
+### Raw classifier test
+
+Use this when you want to test only the trained model without website logging,
+pause gestures, balance scoring, or stability rules:
+
+```bash
+python classify_raw.py
+```
+
+It shows the raw top prediction in the camera window and prints the top three
+class probabilities in the terminal.
+
 ## Project Structure
 
 YoseLog/
 
 - classify_live.py # live pose classification
+- classify_raw.py # raw model-only webcam test
+- app.py # Flask website for live sessions
+- yoselog_core.py # shared pose, stability, balance, and logging logic
+- templates/index.html # session dashboard markup
+- static/app.js # frontend state updates
+- static/styles.css # dashboard styling
 - extract_keypoints.py # extract keypoints from dataset images
 - train_model.py # train Random Forest classifier
 - download_images.py # download images from Yoga-82

@@ -1,5 +1,8 @@
 pose_landmarker.task
 yoselog-env/
+.venv/
+.matplotlib/
+exports/
 __pycache__/
 torun.txt
 

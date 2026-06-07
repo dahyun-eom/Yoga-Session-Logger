@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YoseLog</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="stage">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Yoga Session Logger</p>
+            <h1>YoseLog</h1>
+          </div>
+          <div class="actions" aria-label="Session controls">
+            <button id="startBtn" class="primary" type="button" title="Start session">Start</button>
+            <button id="stopBtn" type="button" title="Stop session">Stop</button>
+            <button id="resetBtn" type="button" title="Reset log">Reset</button>
+            <a class="icon-link" href="/api/export" title="Export CSV">Export</a>
+          </div>
+        </header>
+
+        <div class="workspace">
+          <section class="camera-panel" aria-label="Live pose camera">
+            <div class="video-wrap">
+              <img id="videoFeed" alt="Live yoga pose feed">
+              <div id="emptyState" class="empty-state">
+                <span>Camera is ready</span>
+              </div>
+            </div>
+          </section>
+
+          <aside class="metrics" aria-label="Live session metrics">
+            <section class="metric hero-metric">
+              <span class="label">Current pose</span>
+              <strong id="currentPose">Ready</strong>
+              <small id="message">Start a session to begin logging.</small>
+            </section>
+
+            <section class="metric-row">
+              <div class="metric">
+                <span class="label">Confidence</span>
+                <strong id="confidence">0%</strong>
+              </div>
+              <div class="metric">
+                <span class="label">Hold</span>
+                <strong id="holdTime">0.0s</strong>
+              </div>
+            </section>
+
+            <section class="meter-block">
+              <div class="meter-heading">
+                <span>Stability</span>
+                <strong id="stabilityValue">0%</strong>
+              </div>
+              <div class="meter"><span id="stabilityBar"></span></div>
+            </section>
+
+            <section class="balance-panel">
+              <div class="balance-ring" id="balanceRing">
+                <span id="balanceScore">--</span>
+              </div>
+              <div>
+                <span class="label">Balance score</span>
+                <strong id="balanceStatus">Collecting</strong>
+                <small>Computed from body sway during a held pose.</small>
+              </div>
+            </section>
+
+            <section class="summary-strip">
+              <div>
+                <span class="label">Logged poses</span>
+                <strong id="poseCount">0</strong>
+              </div>
+              <div>
+                <span class="label">Total time</span>
+                <strong id="totalTime">0.0s</strong>
+              </div>
+              <div>
+                <span class="label">Avg balance</span>
+                <strong id="avgBalance">--</strong>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="log-section" aria-label="Session log">
+        <div class="section-heading">
+          <h2>Session Log</h2>
+          <span id="startedAt">Not started</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Pose</th>
+                <th>Duration</th>
+                <th>Balance</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="sessionRows">
+              <tr>
+                <td colspan="4" class="empty-row">No poses logged yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

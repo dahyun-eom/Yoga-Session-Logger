@@ -1,0 +1,6 @@
+flask
+mediapipe
+opencv-python
+numpy
+pandas
+scikit-learn==1.7.2
